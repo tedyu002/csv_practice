@@ -295,21 +295,11 @@ row_cmp(const void *v1, const void *v2, void *config_void)
 		}
 	}
 
-	if (config->sort_order == ASC) {
-		if (d_1->row_id < d_2->row_id) {
-			return -1;
-		}
-		else {
-			return 1;
-		}
+	if (d_1->row_id < d_2->row_id) {
+		return -1;
 	}
 	else {
-		if (d_1->row_id < d_2->row_id) {
-			return 1;
-		}
-		else {
-			return -1;
-		}
+		return 1;
 	}
 
 	return 0;
