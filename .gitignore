@@ -30,7 +30,7 @@
 
 # Executables
 *.exe
-*.out
+a.out
 *.app
 *.i*86
 *.x86_64
@@ -50,3 +50,8 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+
+# test temp file
+test.err
+test.out
+test.res
