@@ -1,10 +1,20 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <limits.h>
 #include <stdio.h>
+#include <regex.h>
+#include <assert.h>
 #include <errno.h>
 
 #include "val.h"
+
+regex_t datetime_reg;
+static bool datetime_reg_init = false;
+static bool free_datetime_reg_exit = false;
+
+static void init_datetime_reg();
+static void free_datetime_reg(int status, void *arg);
 
 int
 val_parse(const char *src, type_t *type, val_t *val)
@@ -23,11 +33,20 @@ val_parse(const char *src, type_t *type, val_t *val)
 
 	switch (type->type) {
 		case INTEGER:
+			errno = 0;
 			val_long = strtol(src, &end_ptr, 10);
 			if (*end_ptr != '\0') {
 				errno = EINVAL;
 				return -1;
 			}
+			if ((LONG_MIN == val_long || LONG_MAX == val_long) && errno == ERANGE) {
+				return -1;
+			}
+			if (val_long < INT_MIN || INT_MAX < val_long) {
+				errno = ERANGE;
+				return -1;
+			}
+
 			val->val.int_v = (int)val_long;
 			break;
 
@@ -81,6 +100,13 @@ val_parse(const char *src, type_t *type, val_t *val)
 			break;
 
 		case DATETIME:
+			init_datetime_reg();
+
+			if (regexec(&datetime_reg, src, 0, NULL, 0) != 0) {
+				errno = EINVAL;
+				return -1;
+			}
+
 			end_ptr = strptime(src, "%Y/%m/%d %H:%M:%S", &tm);
 			if (end_ptr == NULL || *end_ptr != '\0') {
 				errno = EINVAL;
@@ -170,4 +196,28 @@ val_op_less(const val_t *a, const val_t *b, bool *res)
 	}
 
 	return 0;
+}
+
+static void
+init_datetime_reg()
+{
+	if (!datetime_reg_init) {
+		assert(regcomp(&datetime_reg, "[0-9]+/(0[0-9]|1[0-2])/([0-2][0-9]|3[012]) ([0-1][0-9]|2[0-3]):[0-5][0-9]:([0-5][0-9]|60)",
+				 REG_EXTENDED | REG_NOSUB | REG_NEWLINE) == 0);
+		datetime_reg_init = true;
+
+		if (!free_datetime_reg_exit) {
+			on_exit(free_datetime_reg, NULL);
+			free_datetime_reg_exit = true;
+		}
+	}
+}
+
+static void
+free_datetime_reg(int status, void *reg)
+{
+	if (datetime_reg_init) {
+		regfree(&datetime_reg);
+		datetime_reg_init = false;
+	}
 }

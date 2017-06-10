@@ -149,6 +149,15 @@ csv_row_parse(config_t *config, const char **src, const char **err, val_t **row)
 				goto end;
 			}
 		}
+		else {
+			char letter;
+
+			if (token_letter_get(&tmp_src, &letter) == 0) {
+				save_errno = errno;
+				goto end;
+			}
+		}
+
 	}
 
 	*src = tmp_src;

@@ -432,8 +432,12 @@ parse_formula(config_t *config, const char *src)
 			val = 0;
 			errno = 0;
 			val = strtol(str, &end_ptr, 10);
-			if (/* (val == LONG_MIN || val == LONG_MAX) && */errno == ERANGE) {
+			if ((val == LONG_MIN || val == LONG_MAX) && errno == ERANGE) {
 				save_errno = errno;
+				goto end;
+			}
+			if (val < INT_MIN || INT_MAX < val) {
+				save_errno = ERANGE;
 				goto end;
 			}
 			formula_element.is_op = false;
@@ -462,7 +466,7 @@ parse_formula(config_t *config, const char *src)
 			}
 			errno = 0;
 			val = strtol(str, &end_ptr, 10);
-			if (/* (val == LONG_MIN || val == LONG_MAX) && */errno == ERANGE) {
+			if ((val == LONG_MIN || val == LONG_MAX) && errno == ERANGE) {
 				save_errno = errno;
 				goto end;
 			}

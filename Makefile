@@ -1,5 +1,5 @@
 LIBS=src/mmap.o src/config.o src/token.o src/type.o src/csv.o src/val.o src/container.o src/op.o
-INCLUDE=-Isrc
+INCLUDE=
 
 CC=gcc
 CVER=-std=c99
