@@ -12,8 +12,8 @@ CFLAGS=-Wall ${LDFLAGS} -g ${CVER} -Werror -Wpedantic ${INCLUDE} ${DEFS}
 csv_practice: src/main.o ${LIBS}
 	${CC} ${CFLAGS} src/main.o ${LIBS} -o csv_practice
 
-test: src/test.c
-	${CC} ${DEFS} ${CVER} -Werror -Wpedantic  src/test.c -o csv_practice_test
+test: src/main_test.c
+	${CC} ${DEFS} ${CVER} -Werror -Wpedantic  src/main_test.c -o csv_practice_test
 
 
 .PHONY: clean
