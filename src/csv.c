@@ -103,6 +103,21 @@ end:
 }
 
 int
+csv_destroy(config_t *config, val_t *csv, size_t csv_num)
+{
+	if (config == NULL || csv == NULL) {
+		errno = EINVAL;
+		return -1;
+	}
+
+	for (size_t i = 0, lim = config->header_num * csv_num; i < lim; ++i) {
+		val_destroy(&csv[i]);
+	}
+
+	return 0;
+}
+
+int
 csv_row_parse(config_t *config, const char **src, const char **err, val_t **row)
 {
 	val_t *tmp_row = NULL;

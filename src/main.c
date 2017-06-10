@@ -58,6 +58,7 @@ main(int argc, char *argv[])
 
 end:
 	if (csv != NULL) {
+		csv_destroy(&config, csv, csv_num);
 		free(csv);
 		csv = NULL;
 	}

@@ -320,25 +320,32 @@ static int
 parse_sort_headers(config_t *config, const char *field)
 {
 	const char *ptr = NULL;
+	char *name = NULL;
+	int save_errno = 0;
 
 	bool is_set[CSV_HEADER_MAX] = {0};
 
 	ptr = field;
 
 	while (*ptr != '\0') {
-		char *name = NULL;
 		size_t i = 0;
 		char letter;
 
+		if (name != NULL) {
+			free(name);
+			name = NULL;
+		}
+
 		if (token_column_string_get(&ptr, &name) == -1) {
-			return -1;
+			save_errno = errno;
+			goto end;
 		}
 
 		for (int i = 0; i < config->header_num; ++i) {
 			if (strcmp(config->header[i].name, name) == 0) {
 				if (is_set[i]) {
-					errno = EINVAL;
-					return -1;
+					save_errno = EINVAL;
+					goto end;
 				}
 				is_set[i] = true;
 				config->sort_header[config->sort_num] = i;
@@ -347,8 +354,8 @@ parse_sort_headers(config_t *config, const char *field)
 			}
 		}
 		if (i == config->header_num) {
-			errno = EINVAL;
-			return -1;
+			save_errno = EINVAL;
+			goto end;
 		}
 
 		if (token_letter_get(&ptr, &letter) == -1) {
@@ -356,8 +363,8 @@ parse_sort_headers(config_t *config, const char *field)
 		}
 
 		if (letter != ',') {
-			errno = EINVAL;
-			return -1;
+			save_errno = EINVAL;
+			goto end;
 		}
 	}
 
@@ -366,6 +373,17 @@ parse_sort_headers(config_t *config, const char *field)
 			config->sort_header[j] = i;
 			j++;
 		}
+	}
+
+end:
+	if (save_errno != 0) {
+		errno = save_errno;
+		return -1;
+	}
+
+	if (name != NULL) {
+		free(name);
+		name = NULL;
 	}
 
 	return 0;
