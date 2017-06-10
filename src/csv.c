@@ -56,7 +56,7 @@ csv_parse(config_t *config, const char **src, val_t **csv, size_t *csv_num)
 			goto end;
 		}
 
-		if (tmp_csv_num > tmp_csv_size) {
+		if (tmp_csv_num >= tmp_csv_size) {
 			tmp_csv_size *= 2;
 			val_t *new_csv = realloc(tmp_csv, tmp_csv_size * config->header_num * sizeof(val_t));
 

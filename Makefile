@@ -15,9 +15,12 @@ csv_practice: src/main.o ${LIBS}
 test: src/main_test.c
 	${CC} ${DEFS} ${CVER} -Werror -Wpedantic  src/main_test.c -o csv_practice_test
 
+csv_generator: src/main_generator.o ${LIBS}
+	${CC} ${CFLAGS} src/main_generator.o ${LIBS} -o csv_generator
 
 .PHONY: clean
 clean:
 	@rm -rf src/*.o
 	@rm -f csv_practice
 	@rm -f csv_practice_test
+	@rm -f csv_generator
