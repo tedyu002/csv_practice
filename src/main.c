@@ -117,14 +117,16 @@ output_csv(config_t *config, val_t *csv, size_t csv_num)
 {
 	for (size_t i = 0; i < csv_num; i ++) {
 		val_t *row = csv + i * config->header_num;
+		bool is_first = true;
 
 		for (size_t j = 0; j < config->header_num; ++j) {
-			val_t *val = row + j;
+			val_t *val = row + config->sort_header[j];
 
-			if (j != 0) {
+			if (!is_first) {
 				fputc(',', config->out_fp);
 			}
 			output_val(config->out_fp, val);
+			is_first = false;
 		}
 
 		fputc('\n', config->out_fp);

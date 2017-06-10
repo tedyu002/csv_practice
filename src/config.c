@@ -361,6 +361,13 @@ parse_sort_headers(config_t *config, const char *field)
 		}
 	}
 
+	for (size_t i = 0, j = config->sort_num; i < config->header_num; ++i) {
+		if (!is_set[i]) {
+			config->sort_header[j] = i;
+			j++;
+		}
+	}
+
 	return 0;
 }
 
