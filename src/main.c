@@ -74,7 +74,7 @@ end:
 static
 int usage(const char *prog)
 {
-	fprintf(stderr, "%s conf_file csv_file\n", prog);
+	fprintf(stderr, "%s conf_file\n", prog);
 	exit(1);
 }
 
