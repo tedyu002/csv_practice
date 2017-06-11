@@ -184,6 +184,7 @@ config_parse(const char *path, config_t *config)
 		const char *sh = sort_header == NULL ? "" : sort_header;
 
 		if (parse_sort_headers(config, sh) == -1) {
+			fprintf(stderr, "Failed to parse SORT_HEADERS '%s'.\n", sh);
 			save_errno = errno;
 			goto end;
 		}
@@ -360,7 +361,7 @@ parse_sort_headers(config_t *config, const char *field)
 			goto end;
 		}
 
-		for (int i = 0; i < config->header_num; ++i) {
+		for (i = 0; i < config->header_num; ++i) {
 			if (strcmp(config->header[i].name, name) == 0) {
 				if (is_set[i]) {
 					save_errno = EINVAL;
