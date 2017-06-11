@@ -195,6 +195,11 @@ config_parse(const char *path, config_t *config)
 			goto end;
 		}
 	}
+	else {
+		fprintf(stderr, "No HEADERS\n");
+		save_errno = EINVAL;
+		goto end;
+	}
 
 end:
 	if (data != NULL) {
