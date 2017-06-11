@@ -282,53 +282,6 @@ end:
 	return 0;
 }
 
-static int
-row_cmp(const void *v1, const void *v2, void *config_void)
-{
-	config_t *config = (config_t*)config_void;
-	const sort_data_t *d_1 = (const sort_data_t*)v1;
-	const sort_data_t *d_2 = (const sort_data_t*)v2;
-
-	const val_t *row_1 = (const val_t*)d_1->row;
-	const val_t *row_2 = (const val_t*)d_2->row;
-
-	for (size_t i = 0; i < config->sort_num; ++i) {
-		int sort_col = config->sort_header[i];
-		const val_t *col_1 = row_1 + sort_col;
-		const val_t *col_2 = row_2 + sort_col;
-		bool less = false;
-
-		assert(val_op_less(col_1, col_2, &less) == 0);
-		if (less) {
-			if (config->sort_order == ASC) {
-				return -1;
-			}
-			else {
-				return 1;
-			}
-		}
-
-		assert(val_op_less(col_2, col_1, &less) == 0);
-		if (less) {
-			if (config->sort_order == ASC) {
-				return 1;
-			}
-			else {
-				return -1;
-			}
-		}
-	}
-
-	if (d_1->row_id < d_2->row_id) {
-		return -1;
-	}
-	else {
-		return 1;
-	}
-
-	return 0;
-}
-
 int
 csv_cal(config_t *config, val_t *csv, size_t csv_num, array_t *formula, val_t *res)
 {
@@ -336,6 +289,11 @@ csv_cal(config_t *config, val_t *csv, size_t csv_num, array_t *formula, val_t *r
 	bool result_valid = false;
 	int save_errno = 0;
 	val_t cal_err_val = {.type = {.type = INTEGER}, .val = {.int_v = -1}};
+
+	if (config == NULL || csv == NULL || formula == NULL || res == NULL) {
+		errno = EINVAL;
+		return -1;
+	}
 
 	if (array_init(&result, sizeof(val_t), val_destroy_void) == -1) {
 		return -1;
@@ -438,6 +396,53 @@ end:
 	if (save_errno != 0) {
 		errno = save_errno;
 		return -1;
+	}
+
+	return 0;
+}
+
+static int
+row_cmp(const void *v1, const void *v2, void *config_void)
+{
+	config_t *config = (config_t*)config_void;
+	const sort_data_t *d_1 = (const sort_data_t*)v1;
+	const sort_data_t *d_2 = (const sort_data_t*)v2;
+
+	const val_t *row_1 = (const val_t*)d_1->row;
+	const val_t *row_2 = (const val_t*)d_2->row;
+
+	for (size_t i = 0; i < config->sort_num; ++i) {
+		int sort_col = config->sort_header[i];
+		const val_t *col_1 = row_1 + sort_col;
+		const val_t *col_2 = row_2 + sort_col;
+		bool less = false;
+
+		assert(val_op_less(col_1, col_2, &less) == 0);
+		if (less) {
+			if (config->sort_order == ASC) {
+				return -1;
+			}
+			else {
+				return 1;
+			}
+		}
+
+		assert(val_op_less(col_2, col_1, &less) == 0);
+		if (less) {
+			if (config->sort_order == ASC) {
+				return 1;
+			}
+			else {
+				return -1;
+			}
+		}
+	}
+
+	if (d_1->row_id < d_2->row_id) {
+		return -1;
+	}
+	else {
+		return 1;
 	}
 
 	return 0;

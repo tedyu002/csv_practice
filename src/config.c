@@ -13,7 +13,6 @@
 
 #define COL_CMP(col, val, val_len) (strlen(col) == val_len && strncmp(col, val, strlen(col)) == 0)
 
-
 static int parse_header(config_t *config, const char *data);
 static int parse_sort_headers(config_t *config, const char *field);
 static int parse_formula(config_t *config, const char *src);
@@ -29,7 +28,7 @@ config_parse(const char *path, config_t *config)
 	char *sort_header = NULL;
 	char *data = NULL;
 
-	if (config == NULL) {
+	if (path == NULL || config == NULL) {
 		save_errno = EINVAL;
 		goto end;
 	}
@@ -244,9 +243,11 @@ end:
 	return 0;
 }
 
-void config_destroy(config_t *config)
+void
+config_destroy(config_t *config)
 {
 	if (config == NULL) {
+		errno = EINVAL;
 		return;
 	}
 
@@ -274,10 +275,10 @@ void config_destroy(config_t *config)
 	}
 }
 
-int
+static int
 config_get_header_idx(config_t *config, const char *field, size_t *idx)
 {
-	if (config == NULL || field == NULL) {
+	if (config == NULL || field == NULL || idx == NULL) {
 		errno = EINVAL;
 		return -1;
 	}
@@ -301,6 +302,11 @@ parse_header(config_t *config, const char *data)
 	bool final = false;
 	char *tmp_data = NULL;
 	int save_errno = 0;
+
+	if (config == NULL || data == NULL) {
+		errno = EINVAL;
+		return -1;
+	}
 
 	if ((tmp_data = strdup(data)) == NULL) {
 		return -1;
@@ -375,6 +381,11 @@ parse_sort_headers(config_t *config, const char *field)
 	int save_errno = 0;
 
 	bool is_set[CSV_HEADER_MAX] = {0};
+
+	if (config == NULL || field == NULL) {
+		errno = EINVAL;
+		return -1;
+	}
 
 	ptr = field;
 
@@ -453,6 +464,11 @@ parse_formula(config_t *config, const char *src)
 	bool is_print_get = false;
 
 	int save_errno = 0;
+
+	if (config == NULL || src == NULL) {
+		errno = EINVAL;
+		return -1;
+	}
 
 	if (array_init(&formula, sizeof(formula_element_t), NULL) == -1) {
 		save_errno = errno;
@@ -663,6 +679,10 @@ is_valid_header_name(config_t *config, const char *header)
 {
 	const char *ptr = header;
 
+	if (config == NULL || header == NULL) {
+		return false;
+	}
+
 	while (*ptr != '\0') {
 		switch(*ptr) {
 			case '*':
@@ -684,4 +704,3 @@ is_valid_header_name(config_t *config, const char *header)
 
 	return true;
 }
-

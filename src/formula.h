@@ -1,5 +1,5 @@
-#ifndef __FORMULA_H
-#define __FORMULA_H
+#ifndef __TZUTE_FORMULA_H
+#define __TZUTE_FORMULA_H
 
 #include <stddef.h>
 #include <stdbool.h>

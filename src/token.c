@@ -6,7 +6,6 @@
 
 #include "token.h"
 
-
 int
 token_string_get(const char **src, char **string)
 {

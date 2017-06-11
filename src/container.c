@@ -4,10 +4,14 @@
 
 #include "container.h"
 
-
 int
 array_init(array_t *array, size_t ele_size, void (*dealloc)(void *data))
 {
+	if (array == NULL || ele_size == 0) {
+		errno = EINVAL;
+		return -1;
+	}
+
 	array->data = NULL;
 	array->ele_size = ele_size;
 	array->len = 0;
@@ -24,7 +28,7 @@ array_init(array_t *array, size_t ele_size, void (*dealloc)(void *data))
 int
 array_add(array_t *array, const void *data)
 {
-	if (data == NULL) {
+	if (array == NULL || data == NULL) {
 		errno = EINVAL;
 		return -1;
 	}
@@ -90,6 +94,7 @@ array_destroy(array_t *array)
 void
 array_destroy_void(void *array)
 {
-	array_destroy((array_t*)array);
+	if (array != NULL) {
+		array_destroy((array_t*)array);
+	}
 }
-
