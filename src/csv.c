@@ -2,6 +2,7 @@
 #include <string.h>
 #include <assert.h>
 
+#include "limits.h"
 #include "config.h"
 #include "token.h"
 #include "csv.h"
@@ -18,7 +19,7 @@ csv_parse(config_t *config, const char **src, val_t **csv, size_t *csv_num)
 {
 	val_t *tmp_csv = NULL;
 	size_t tmp_csv_num = 0;
-	size_t tmp_csv_size = 32;
+	size_t tmp_csv_size = CSV_ROW_MAX;
 	const char *tmp_src = NULL;
 	int save_errno = 0;
 	val_t *res_row = NULL;

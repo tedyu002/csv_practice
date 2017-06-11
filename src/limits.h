@@ -6,5 +6,6 @@
 #define CHAR_MAX_LEN			128
 #define CHAR_MAX_SIZE		(CHAR_MAX_LEN + 1)
 #define CSV_HEADER_MAX		20
+#define CSV_ROW_MAX			100000
 
 #endif
