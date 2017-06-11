@@ -30,30 +30,30 @@ main(int argc, char *argv[])
 	}
 
 	if (config_parse(argv[1], &config) == -1) {
-		printf("config '%s' parse error\n", argv[1]);
+		fprintf(stderr, "config '%s' parse error\n", argv[1]);
 		ex = 1;
 		goto end;
 	}
 	config_init = true;
 
 	if (get_csv(&config, &csv, &csv_num) == -1) {
-		printf("failed to parse csv\n");
+		fprintf(stderr, "failed to parse csv\n");
 		ex = 1;
 		goto end;
 	}
 
 	if (csv_sort(&config, csv, csv_num) == -1) {
-		printf("Failed to sort csv.\n");
+		fprintf(stderr, "Failed to sort csv.\n");
 		ex = 1;
 		goto end;
 	}
 
 	if (output_csv(&config, csv, csv_num) == -1) {
-		printf("Failed to output csv.\n");
+		fprintf(stderr, "Failed to output csv.\n");
 	}
 
 	if (output_formulas(&config, csv, csv_num) == -1) {
-		printf("Failed to output formulas.\n");
+		fprintf(stderr, "Failed to output formulas.\n");
 	}
 
 end:
@@ -88,7 +88,7 @@ get_csv(config_t *config, val_t **csv, size_t *csv_num)
 
 	if (mmap_alloc(config->input_file, &csv_input_void, &csv_input_size) == -1) {
 		errno = save_errno;
-		printf("Failed to csv file '%s'.\n", config->input_file);
+		fprintf(stderr, "Failed to mmap csv file '%s'.\n", config->input_file);
 		goto end;
 	}
 
@@ -96,7 +96,6 @@ get_csv(config_t *config, val_t **csv, size_t *csv_num)
 
 	if (csv_parse(config, &csv_input, csv, csv_num) == -1) {
 		errno = save_errno;
-		printf("Failed to parse csv.\n");
 		goto end;
 	}
 

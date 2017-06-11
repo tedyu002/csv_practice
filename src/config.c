@@ -26,6 +26,7 @@ config_parse(const char *path, config_t *config)
 	size_t config_size;
 	int save_errno = 0;
 	char *sort_header = NULL;
+	char *data = NULL;
 
 	if (config == NULL) {
 		save_errno = EINVAL;
@@ -50,7 +51,6 @@ config_parse(const char *path, config_t *config)
 		const char *line_end = NULL;
 		const char *line_sep = NULL;
 		size_t col_len = 0;
-		char *data = NULL;
 		int res = 0;
 
 		line_end = strchr(config_ptr, '\n');
@@ -71,10 +71,10 @@ config_parse(const char *path, config_t *config)
 			config_ptr = line_sep + 1;
 			if (token_string_get(&config_ptr, &data) == -1) {
 				save_errno = errno;
+				fprintf(stderr, "Failed to parse CSV_INPUT '%s'.\n", data);
 				goto end;
 			}
 			res = snprintf(config->input_file, sizeof(config->input_file), "%s", data);
-			free(data);
 
 			if (res < 0 || res > sizeof(config->input_file)) {
 				save_errno = EINVAL;
@@ -85,82 +85,75 @@ config_parse(const char *path, config_t *config)
 			config_ptr = line_sep + 1;
 			if (token_string_get(&config_ptr, &data) == -1) {
 				save_errno = errno;
+				fprintf(stderr, "Failed to parse CSV_OUTPUT '%s'.\n", data);
 				goto end;
 			}
 			if ((config->out_fp = fopen(data, "w")) == NULL) {
 				save_errno = errno;
-				free(data);
+				fprintf(stderr, "Failed to open '%s'.", data);
 				goto end;
 			}
-			free(data);
 		}
 		else if (COL_CMP("CSV_ERROR", config_ptr, col_len)) {
 			config_ptr = line_sep + 1;
 			if (token_string_get(&config_ptr, &data) == -1) {
 				save_errno = errno;
+				fprintf(stderr, "Failed to parse CSV_ERROR '%s'.\n", data);
 				goto end;
 			}
 			if ((config->err_fp = fopen(data, "w")) == NULL) {
 				save_errno = errno;
-				free(data);
+				fprintf(stderr, "Failed to open '%s'.\n", data);
 				goto end;
 			}
-			free(data);
 		}
 		else if (COL_CMP("CSV_RESULT", config_ptr, col_len)) {
 			config_ptr = line_sep + 1;
 			if (token_string_get(&config_ptr, &data) == -1) {
 				save_errno = errno;
+				fprintf(stderr, "Failed to parse CSV_RESULT '%s'.\n", data);
 				goto end;
 			}
 			if ((config->res_fp = fopen(data, "w")) == NULL) {
 				save_errno = errno;
-				free(data);
+				fprintf(stderr, "Failed to open '%s'.", data);
 				goto end;
 			}
-			free(data);
 		}
 		else if (COL_CMP("CSV_FORMULA", config_ptr, col_len)) {
 			config_ptr = line_sep + 1;
-			if (token_string_get(&config_ptr, &data) == -1) {
+			if (token_string_get(&config_ptr, &data) == -1 ||
+				 parse_formula(config, data) == -1) {
 				save_errno = errno;
+				fprintf(stderr, "Failed to parse CSV_FORMULA '%s'.\n", data);
 				goto end;
 			}
-
-			if (parse_formula(config, data) == -1) {
-				save_errno = errno;
-				free(data);
-				goto end;
-			}
-			free(data);
 		}
 		else if (COL_CMP("HEADERS", config_ptr, col_len)) {
 			config_ptr = line_sep + 1;
-			if (token_string_get(&config_ptr, &data) == -1) {
+			if (token_string_get(&config_ptr, &data) == -1 ||
+				 parse_header(config, data) == -1) {
 				save_errno = errno;
+				fprintf(stderr, "Failed to parse HEADERS '%s'.\n", data);
 				goto end;
 			}
-
-			if (parse_header(config, data) == -1) {
-				save_errno = errno;
-				free(data);
-				goto end;
-			}
-			free(data);
 		}
 		else if (COL_CMP("SORT_HEADERS", config_ptr, col_len)) {
 			config_ptr = line_sep + 1;
 			if (token_string_get(&config_ptr, &data) == -1) {
 				save_errno = errno;
+				fprintf(stderr, "Failed to parse SORT_HEADERS '%s'.\n", data);
 				goto end;
 			}
 
 			sort_header = data;
+			data = NULL;
 		}
 		else if (COL_CMP("SORT_ORDER", config_ptr, col_len)) {
 			config_ptr = line_sep + 1;
 			if (token_string_get(&config_ptr, &data) == -1) {
 				save_errno = errno;
+				fprintf(stderr, "Failed to parse SORT_ORDER '%s'.\n", data);
 				goto end;
 			}
 
@@ -171,14 +164,18 @@ config_parse(const char *path, config_t *config)
 				config->sort_order = DESC;
 			}
 			else {
-				free(data);
 				save_errno = EINVAL;
+				fprintf(stderr, "Failed to parse SORT_ORDER '%s'.\n", data);
 				goto end;
 			}
-			free(data);
 		}
 		else {
 			config_ptr = *line_end == '\0' ? line_end : line_end + 1;
+		}
+
+		if (data != NULL) {
+			free(data);
+			data = NULL;
 		}
 	}
 
@@ -192,6 +189,11 @@ config_parse(const char *path, config_t *config)
 	}
 
 end:
+	if (data != NULL) {
+		free(data);
+		data = NULL;
+	}
+
 	if (config_mem != NULL) {
 		mmap_free(config_mem, config_size);
 		config_mem = NULL;
