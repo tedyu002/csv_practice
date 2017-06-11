@@ -31,7 +31,6 @@ type_parse(const char *src, type_t *type)
 	}
 	else {
 		const char *end = NULL;
-		char *to_l_end_ptr = NULL;
 		size_t len_limit = 0;
 
 		if (strncmp("VARCHAR", src, strlen("VARCHAR")) == 0) {
@@ -64,6 +63,7 @@ type_parse(const char *src, type_t *type)
 			}
 			else if (!isdigit(*end)) {
 				long val = 0;
+				char *to_l_end_ptr = NULL;
 
 				if (*end != ')') {
 					errno = EINVAL;
