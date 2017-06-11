@@ -201,6 +201,22 @@ config_parse(const char *path, config_t *config)
 		goto end;
 	}
 
+	if (config->out_fp == NULL) {
+		fprintf(stderr, "NO CSV_OUTPUT\n");
+		save_errno = EINVAL;
+		goto end;
+	}
+	if (config->err_fp == NULL) {
+		fprintf(stderr, "NO CSV_ERROR\n");
+		save_errno = EINVAL;
+		goto end;
+	}
+	if (config->res_fp == NULL) {
+		fprintf(stderr, "NO CSV_RESULT\n");
+		save_errno = EINVAL;
+		goto end;
+	}
+
 end:
 	if (data != NULL) {
 		free(data);
