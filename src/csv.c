@@ -388,6 +388,14 @@ csv_cal(config_t *config, val_t *csv, size_t csv_num, array_t *formula, val_t *r
 				size_t row = formula_element->val.operand.val.variable.row_num;
 
 				val_t *src_val = csv + row * config->header_num + col;
+
+				if (row < csv_num) {
+					src_val = csv + row * config->header_num + col;
+				}
+				else {
+					src_val = &cal_err_val;
+				}
+
 				val_t clone_val;
 
 				if (val_clone(src_val, &clone_val) == -1) {
