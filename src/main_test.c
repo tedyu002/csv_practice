@@ -109,7 +109,9 @@ do_test(DIR *dir, const char *fname, int depth)
 		}
 	}
 	else if (pid == 0) {
-		fchdir(dirfd(dir));
+		if (fchdir(dirfd(dir)) == -1) {
+			exit(1);
+		}
 		char path[PATH_MAX] = "";
 		int fd = -1;
 
