@@ -188,6 +188,12 @@ config_parse(const char *path, config_t *config)
 			save_errno = errno;
 			goto end;
 		}
+
+		if (config->sort_num > 0 && config->sort_order == NOSORT) {
+			fprintf(stderr, "No SORT_HEADERS.\n");
+			save_errno = EINVAL;
+			goto end;
+		}
 	}
 
 end:
