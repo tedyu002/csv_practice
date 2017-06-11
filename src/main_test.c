@@ -85,7 +85,7 @@ do_test(DIR *dir, const char *fname, int depth)
 
 		wait(&status);
 
-		if (!WIFEXITED(status) || WEXITSTATUS(status) != 0) {
+		if (!WIFEXITED(status)) {
 			printf("%s: Failed\n", fname);
 			return;
 		}
@@ -113,7 +113,7 @@ do_test(DIR *dir, const char *fname, int depth)
 		char path[PATH_MAX] = "";
 		int fd = -1;
 
-		if ((fd = creat("test.stderr", S_IRWXU | S_IRUSR)) < 0) {
+		if ((fd = creat("test.stderr", S_IRUSR | S_IWUSR)) < 0) {
 			exit(1);
 		}
 		if (fd != STDERR_FILENO) {

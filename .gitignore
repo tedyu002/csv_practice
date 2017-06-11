@@ -55,3 +55,4 @@ dkms.conf
 test.err
 test.out
 test.res
+test.stderr
