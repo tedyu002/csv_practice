@@ -51,6 +51,9 @@ Module.symvers
 Mkfile.old
 dkms.conf
 
+# Vim tmp file
+*.swp
+
 # test temp file
 test.err
 test.out
