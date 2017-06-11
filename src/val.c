@@ -112,7 +112,10 @@ val_parse(const char *src, type_t *type, val_t *val)
 				errno = EINVAL;
 				return -1;
 			}
-			val->val.datetime_v = mktime(&tm);
+			if ((val->val.datetime_v = mktime(&tm)) == (time_t)-1) {
+				errno = EINVAL;
+				return -1;
+			}
 			break;
 	}
 
