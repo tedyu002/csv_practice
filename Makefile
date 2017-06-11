@@ -1,5 +1,4 @@
 LIBS=src/mmap.o src/config.o src/token.o src/type.o src/csv.o src/val.o src/container.o src/op.o
-INCLUDE=
 
 CC=gcc
 CVER=-std=c99
@@ -7,7 +6,7 @@ CVER=-std=c99
 #FLTO="-flto"
 DEFS=-D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=700 -D_GNU_SOURCE
 LDFLAGS=${FLTO} ${ASAN}
-CFLAGS=-Wall ${LDFLAGS} -g ${CVER} -Werror -Wpedantic ${INCLUDE} ${DEFS}
+CFLAGS=-Wall ${LDFLAGS} -g ${CVER} -Werror -Wpedantic ${DEFS}
 
 all: csv_practice csv_test csv_generator
 
