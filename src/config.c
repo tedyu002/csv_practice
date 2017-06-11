@@ -182,8 +182,10 @@ config_parse(const char *path, config_t *config)
 		}
 	}
 
-	if (sort_header != NULL && config->header_num > 0) {
-		if (parse_sort_headers(config, sort_header) == -1) {
+	if (config->header_num > 0) {
+		const char *sh = sort_header == NULL ? "" : sort_header;
+
+		if (parse_sort_headers(config, sh) == -1) {
 			save_errno = errno;
 			goto end;
 		}
