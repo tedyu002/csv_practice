@@ -9,7 +9,7 @@ DEFS=-D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=700 -D_GNU_SOURCE
 LDFLAGS=${FLTO} ${ASAN}
 CFLAGS=-Wall ${LDFLAGS} -g ${CVER} -Werror -Wpedantic ${INCLUDE} ${DEFS}
 
-all: csv_practice test csv_generator
+all: csv_practice csv_test csv_generator
 
 csv_practice: src/main.o ${LIBS}
 	${CC} ${CFLAGS} src/main.o ${LIBS} -o csv_practice
