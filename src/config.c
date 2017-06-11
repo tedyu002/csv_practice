@@ -565,6 +565,10 @@ parse_formula(config_t *config, const char *src)
 				save_errno = errno;
 				goto end;
 			}
+			if (*end_ptr != '\0' || val < 0) {
+				save_errno = EINVAL;
+				goto end;
+			}
 			free(str);
 			str = NULL;
 
