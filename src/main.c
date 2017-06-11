@@ -143,6 +143,7 @@ output_formulas(config_t *config, val_t *csv, size_t csv_num)
 		val_t val;
 
 		if (csv_cal(config, csv, csv_num, formula, &val) == -1) {
+			fputc('\n', config->res_fp);
 			continue;
 		}
 
