@@ -138,6 +138,11 @@ token_column_string_get(const char **src, char **string)
 			if (*col_end == ',' || *col_end == '\n') {
 				break;
 			}
+			else if (*col_end == '"') {
+				*src = col_end + 1;
+				errno = EINVAL;
+				return -1;
+			}
 			col_end++;
 		}
 
