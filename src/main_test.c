@@ -81,6 +81,7 @@ do_test(DIR *dir, const char *fname, int depth)
 		char ans_out[PATH_MAX] = "";
 		char ans_res[PATH_MAX] = "";
 		char ans_err[PATH_MAX] = "";
+		char ans_stderr[PATH_MAX] = "";
 
 		wait(&status);
 
@@ -92,12 +93,15 @@ do_test(DIR *dir, const char *fname, int depth)
 		strcpy(ans_out, fname);
 		strcpy(ans_res, fname);
 		strcpy(ans_err, fname);
+		strcpy(ans_stderr, fname);
 
 		strcat(ans_out, ".out");
 		strcat(ans_res, ".res");
 		strcat(ans_err, ".err");
+		strcat(ans_stderr, ".stderr");
 
-		if (!is_same(dir, ans_out, "test.out") || !is_same(dir, ans_err, "test.err") || !is_same(dir, ans_res, "test.res")) {
+		if (!is_same(dir, ans_out, "test.out") || !is_same(dir, ans_err, "test.err") ||
+			 !is_same(dir, ans_res, "test.res") || !is_same(dir, ans_stderr, "test.stderr")) {
 			printf("%s: Failed\n", fname);
 		}
 		else {
@@ -107,6 +111,15 @@ do_test(DIR *dir, const char *fname, int depth)
 	else if (pid == 0) {
 		fchdir(dirfd(dir));
 		char path[PATH_MAX] = "";
+		int fd = -1;
+
+		if ((fd = creat("test.stderr", S_IRWXU | S_IRUSR)) < 0) {
+			exit(1);
+		}
+		if (fd != STDERR_FILENO) {
+			dup2(fd, STDERR_FILENO);
+			close(fd);
+		}
 
 		for (int i = 0; i < depth; ++i) {
 			strcat(path, "../");
@@ -179,4 +192,3 @@ end:
 
 	return res;
 }
-
