@@ -393,6 +393,7 @@ static int
 parse_formula(config_t *config, const char *src)
 {
 	const char *ptr = src;
+	char *str = NULL;
 
 	array_t formula;
 	array_t formula_op;
@@ -416,7 +417,6 @@ parse_formula(config_t *config, const char *src)
 	formula_op_valid = true;
 
 	while (true) {
-		char *str = NULL;
 		long val = 0;
 		char *end_ptr = NULL;
 		formula_element_t formula_element;
@@ -434,6 +434,8 @@ parse_formula(config_t *config, const char *src)
 		if (!is_print_get) {
 			if (strcmp(str, "Print") == 0) {
 				is_print_get = true;
+				free(str);
+				str = NULL;
 				continue;
 			}
 			else {
@@ -441,11 +443,11 @@ parse_formula(config_t *config, const char *src)
 				goto end;
 			}
 		}
-
 		if (str[0] == '*' || str[0] == '+' || str[0] == '[' || str[0] == ']') {
 			save_errno = EINVAL;
 			goto end;
 		}
+
 		if (config_get_header_idx(config, str, &formula_element.val.operand.val.variable.col) == -1) {
 			val = 0;
 			errno = 0;
@@ -462,8 +464,14 @@ parse_formula(config_t *config, const char *src)
 			formula_element.val.operand.is_constant = true;
 			formula_element.val.operand.val.constant.type.type = INTEGER;
 			formula_element.val.operand.val.constant.val.int_v = val;
+
+			free(str);
+			str = NULL;
 		}
 		else {
+			free(str);
+			str = NULL;
+
 			formula_element.val.operand.is_constant = false;
 			if (token_formula_get(&ptr, &str) == -1) {
 				save_errno = errno;
@@ -473,6 +481,8 @@ parse_formula(config_t *config, const char *src)
 				save_errno = EINVAL;
 				goto end;
 			}
+			free(str);
+			str = NULL;
 
 			if (token_formula_get(&ptr, &str) == -1) {
 				save_errno = errno;
@@ -488,6 +498,9 @@ parse_formula(config_t *config, const char *src)
 				save_errno = errno;
 				goto end;
 			}
+			free(str);
+			str = NULL;
+
 			formula_element.val.operand.val.variable.row_num = val;
 
 			if (token_formula_get(&ptr, &str) == -1) {
@@ -498,6 +511,8 @@ parse_formula(config_t *config, const char *src)
 				save_errno = EINVAL;
 				goto end;
 			}
+			free(str);
+			str = NULL;
 		}
 
 		if (array_add(&formula, &formula_element) == -1) {
@@ -525,6 +540,8 @@ parse_formula(config_t *config, const char *src)
 			save_errno = EINVAL;
 			goto end;
 		}
+		free(str);
+		str = NULL;
 
 		while (formula_op.len > 0) {
 			formula_element_t *op = ARRAY_GET(&formula_op, formula_element_t, formula_op.len - 1);
@@ -575,6 +592,11 @@ end:
 
 	if (formula_op_valid) {
 		array_destroy(&formula_op);
+	}
+
+	if (str != NULL) {
+		free(str);
+		str = NULL;
 	}
 
 	if (save_errno != 0) {
