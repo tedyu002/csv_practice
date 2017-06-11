@@ -192,7 +192,7 @@ token_formula_get(const char **src, char **string)
 	}
 
 	str_end = beg;
-	while (!(*str_end == '*' || *str_end == '+' || *str_end == '-' ||
+	while (!(*str_end == '*' || *str_end == '+' ||
 				*str_end == '[' || *str_end == ']' ||
 				*str_end == ' ' || *str_end == '\0')) {
 		str_end++;
