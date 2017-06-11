@@ -348,7 +348,6 @@ csv_cal(config_t *config, val_t *csv, size_t csv_num, array_t *formula, val_t *r
 			val_t *v1 = NULL;
 			val_t *v2 = NULL;
 			val_t vt;
-			val_t *st = &vt;
 
 			if (result.len < 2) {
 				save_errno = EINVAL;
@@ -359,7 +358,16 @@ csv_cal(config_t *config, val_t *csv, size_t csv_num, array_t *formula, val_t *r
 			v2 = ARRAY_GET(&result, val_t, result.len - 1);
 
 			if (type_operators[v1->type.type][formula_element->val.op](v1, v2, &vt) == -1) {
-				st = &cal_err_val;
+				if (errno != ENOMEM) {
+					if (val_clone(&cal_err_val, res) == -1) {
+						save_errno = errno;
+					}
+					goto end;
+				}
+				else {
+					save_errno = errno;
+					goto end;
+				}
 			}
 
 			if (array_del_last(&result, true) == -1) {
@@ -371,7 +379,7 @@ csv_cal(config_t *config, val_t *csv, size_t csv_num, array_t *formula, val_t *r
 				goto end;
 			}
 
-			if (array_add(&result, st) == -1) {
+			if (array_add(&result, &vt) == -1) {
 				save_errno = errno;
 				goto end;
 			}
@@ -387,14 +395,14 @@ csv_cal(config_t *config, val_t *csv, size_t csv_num, array_t *formula, val_t *r
 				size_t col = formula_element->val.operand.val.variable.col;
 				size_t row = formula_element->val.operand.val.variable.row_num;
 
-				val_t *src_val = csv + row * config->header_num + col;
+				if (row >= csv_num) {
+					if (val_clone(&cal_err_val, res) == -1) {
+						save_errno = errno;
+					}
+					goto end;
+				}
 
-				if (row < csv_num) {
-					src_val = csv + row * config->header_num + col;
-				}
-				else {
-					src_val = &cal_err_val;
-				}
+				val_t *src_val = csv + row * config->header_num + col;
 
 				val_t clone_val;
 
