@@ -234,7 +234,9 @@ end:
 	}
 
 	if (save_errno != 0) {
-		config_destroy(config);
+		if (config != NULL) {
+			config_destroy(config);
+		}
 		errno = save_errno;
 		return -1;
 	}
@@ -338,11 +340,13 @@ parse_header(config_t *config, const char *data)
 		}
 
 		if (type_parse(type, &config->header[config->header_num].type) == -1) {
-			return -1;
+			save_errno = errno;
+			goto end;
 		}
 
 		if ((config->header[config->header_num].name = strdup(name)) == NULL) {
-			return -1;
+			save_errno = errno;
+			goto end;
 		}
 
 		config->header_num++;
@@ -423,14 +427,14 @@ parse_sort_headers(config_t *config, const char *field)
 	}
 
 end:
-	if (save_errno != 0) {
-		errno = save_errno;
-		return -1;
-	}
-
 	if (name != NULL) {
 		free(name);
 		name = NULL;
+	}
+
+	if (save_errno != 0) {
+		errno = save_errno;
+		return -1;
 	}
 
 	return 0;
