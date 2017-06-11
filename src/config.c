@@ -14,9 +14,10 @@
 #define COL_CMP(col, val, val_len) (strlen(col) == val_len && strncmp(col, val, strlen(col)) == 0)
 
 
-static int parse_header(config_t *config, char *data);
+static int parse_header(config_t *config, const char *data);
 static int parse_sort_headers(config_t *config, const char *field);
 static int parse_formula(config_t *config, const char *src);
+static bool is_valid_header_name(config_t *config, const char *header);
 
 int
 config_parse(const char *path, config_t *config)
@@ -263,13 +264,19 @@ config_get_header_idx(config_t *config, const char *field, size_t *idx)
 }
 
 static int
-parse_header(config_t *config, char *data)
+parse_header(config_t *config, const char *data)
 {
 	char *ptr = NULL;
 	char *sep = NULL;
 	bool final = false;
+	char *tmp_data = NULL;
+	int save_errno = 0;
 
-	ptr = data;
+	if ((tmp_data = strdup(data)) == NULL) {
+		return -1;
+	}
+
+	ptr = tmp_data;
 	while (!final && *ptr != '\0') {
 		char *save_ptr = NULL;
 		char *name = NULL;
@@ -283,25 +290,23 @@ parse_header(config_t *config, char *data)
 		}
 
 		if ((name = strtok_r(ptr, " ", &save_ptr)) == NULL) {
-			errno = EINVAL;
-			return -1;
+			save_errno = EINVAL;
+			goto end;
 		}
 
 		if ((type = strtok_r(NULL, " ", &save_ptr)) == NULL) {
-			errno = EINVAL;
-			return -1;
+			save_errno = EINVAL;
+			goto end;
 		}
 
 		if (strtok_r(NULL, " ", &save_ptr) != NULL) {
-			errno = EINVAL;
-			return -1;
+			save_errno = EINVAL;
+			goto end;
 		}
 
-		for (size_t i = 0; i < config->header_num; ++i) {
-			if (strcmp(config->header[i].name, name) == 0) {
-				errno = EINVAL;
-				return -1;
-			}
+		if (!is_valid_header_name(config, name)) {
+			save_errno = EINVAL;
+			goto end;
 		}
 
 		if (type_parse(type, &config->header[config->header_num].type) == -1) {
@@ -317,6 +322,16 @@ parse_header(config_t *config, char *data)
 		ptr = sep + 1;
 	}
 
+end:
+	if (tmp_data != NULL) {
+		free(tmp_data);
+		tmp_data = NULL;
+	}
+
+	if (save_errno != 0) {
+		errno = save_errno;
+		return -1;
+	}
 	return 0;
 }
 
@@ -610,3 +625,31 @@ end:
 
 	return 0;
 }
+
+static bool
+is_valid_header_name(config_t *config, const char *header)
+{
+	const char *ptr = header;
+
+	while (*ptr != '\0') {
+		switch(*ptr) {
+			case '*':
+			case '+':
+			case '[':
+			case ']':
+			case '-':
+				return false;
+		}
+
+		ptr++;
+	}
+
+	for (size_t i = 0; i < config->header_num; ++i) {
+		if (strcmp(config->header[i].name, header) == 0) {
+			return false;
+		}
+	}
+
+	return true;
+}
+
