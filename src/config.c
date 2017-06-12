@@ -316,7 +316,7 @@ parse_header(config_t *config, const char *data)
 	}
 
 	ptr = tmp_data;
-	while (!final && *ptr != '\0') {
+	while (!final) {
 		char *save_ptr = NULL;
 		char *name = NULL;
 		char *type = NULL;
