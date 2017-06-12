@@ -619,7 +619,7 @@ parse_formula(config_t *config, const char *src)
 
 		while (formula_op.len > 0) {
 			formula_element_t *op = ARRAY_GET(&formula_op, formula_element_t, formula_op.len - 1);
-			if (op->val.op == formula_element.val.op || (op->val.op == '*' && formula_element.val.op == '+')) {
+			if (op->val.op == formula_element.val.op || (op->val.op == MULTIPLE && formula_element.val.op == ADD)) {
 				if (array_add(&formula, op) == -1) {
 					save_errno = errno;
 					goto end;
