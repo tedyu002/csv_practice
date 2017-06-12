@@ -3,6 +3,7 @@
 
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdint.h>
 
 typedef struct {
 	void *data;
@@ -12,7 +13,7 @@ typedef struct {
 	void (*dealloc)(void *data);
 } array_t;
 
-#define ARRAY_GET(array, type, idx) (type*)((char*)(array)->data + sizeof(type) * (idx))
+#define ARRAY_GET(array, type, idx) (type*)((int8_t*)(array)->data + sizeof(type) * (idx))
 
 int array_init(array_t *array, size_t ele_size, void (*dealloc)(void *data));
 int array_add(array_t *array, const void *data);
