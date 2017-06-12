@@ -48,6 +48,7 @@ config_parse(const char *path, config_t *config)
 		save_errno = errno;
 		goto end;
 	}
+	raw_formulas_init = true;
 
 	if (mmap_alloc(path, &config_mem, &config_size) == -1) {
 		save_errno = errno;
