@@ -33,7 +33,7 @@ config_parse(const char *path, config_t *config)
 		goto end;
 	}
 
-	setenv("TZ", "UTF", 1);
+	setenv("TZ", "UTC", 1);
 	tzset();
 
 	memset(config, 0, sizeof(*config));
