@@ -4,6 +4,7 @@
 #include <errno.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <ctype.h>
 
 #include "mmap.h"
 #include "token.h"
@@ -698,6 +699,14 @@ is_valid_header_name(config_t *config, const char *header)
 		return false;
 	}
 
+	if (*ptr == '\0') {
+		return false;
+	}
+
+	if (isdigit(*ptr)) {
+		return false;
+	}
+
 	while (*ptr != '\0') {
 		switch(*ptr) {
 			case '*':
@@ -706,6 +715,10 @@ is_valid_header_name(config_t *config, const char *header)
 			case ']':
 			case '-':
 				return false;
+		}
+
+		if (isspace(*ptr)) {
+			return false;
 		}
 
 		ptr++;
