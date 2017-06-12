@@ -76,7 +76,7 @@ gen_csv(config_t *config, val_t **csv, size_t row_num)
 	char printable_str[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz\"!@#$%^&*()_+=-,./\\";
 
 	*csv = malloc(sizeof(val_t) * config->header_num * row_num);
-	if (csv == NULL) {
+	if (*csv == NULL) {
 		return -1;
 	}
 
