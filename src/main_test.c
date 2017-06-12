@@ -142,11 +142,13 @@ is_same(DIR *dir, const char *f1, const char *f2)
 
 	struct stat st1, st2;
 
-	if ((fd1 = openat(dirfd(dir), f1, O_RDONLY)) < 0) {
-		goto end;
-	}
+	fd1 = openat(dirfd(dir), f1, O_RDONLY);
+	fd2 = openat(dirfd(dir), f2, O_RDONLY);
 
-	if ((fd2 = openat(dirfd(dir), f2, O_RDONLY)) < 0) {
+	if (fd1 < 0 && fd2 < 0) {
+		return true;
+	}
+	else if (!(fd1 >= 0 && fd2 >= 0)) {
 		goto end;
 	}
 
