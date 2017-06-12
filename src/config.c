@@ -382,6 +382,7 @@ parse_sort_headers(config_t *config, const char *field)
 	const char *ptr = NULL;
 	char *name = NULL;
 	int save_errno = 0;
+	bool has_next = false;
 
 	bool is_set[CSV_HEADER_MAX] = {0};
 
@@ -424,6 +425,7 @@ parse_sort_headers(config_t *config, const char *field)
 		}
 
 		if (token_letter_get(&ptr, &letter) == -1) {
+			has_next = false;
 			break;
 		}
 
@@ -431,6 +433,12 @@ parse_sort_headers(config_t *config, const char *field)
 			save_errno = EINVAL;
 			goto end;
 		}
+		has_next = true;
+	}
+
+	if (has_next) {
+		save_errno = EINVAL;
+		goto end;
 	}
 
 	for (size_t i = 0, j = config->sort_num; i < config->header_num; ++i) {
