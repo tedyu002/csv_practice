@@ -29,6 +29,10 @@ main(int argc, char *argv[])
 		usage(argv[0]);
 	}
 
+	/* Prevent time function affeteed by local */
+	setenv("TZ", "UTC", 1);
+	tzset();
+
 	if (config_parse(argv[1], &config) == -1) {
 		fprintf(stderr, "config '%s' parse error\n", argv[1]);
 		ex = 1;
