@@ -33,8 +33,14 @@ val_parse(const char *src, type_t *type, val_t *val)
 
 	switch (type->type) {
 		case INTEGER:
+			if (*src == '\0') {
+				errno = EINVAL;
+				return -1;
+			}
+
 			errno = 0;
 			val_long = strtol(src, &end_ptr, 10);
+
 			if (*end_ptr != '\0') {
 				errno = EINVAL;
 				return -1;
@@ -65,6 +71,11 @@ val_parse(const char *src, type_t *type, val_t *val)
 			break;
 
 		case DOUBLE:
+			if (*src == '\0') {
+				errno = EINVAL;
+				return -1;
+			}
+
 			val_double = strtod(src, &end_ptr);
 			if (*end_ptr != '\0') {
 				errno = EINVAL;
