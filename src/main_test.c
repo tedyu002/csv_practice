@@ -34,12 +34,11 @@ traverse(const char *dir_path, int depth)
 		struct dirent ent, *tmp_ent = NULL;
 		struct stat st;
 
-		if (readdir_r(dir, &ent, &tmp_ent) > 0) {
+		if ((tmp_ent = readdir(dir)) == NULL) {
 			break;
 		}
-		else if (tmp_ent == NULL) {
-			break;
-		}
+
+		memcpy(&ent, tmp_ent, sizeof(ent));
 
 		if (ent.d_name[0] == '.') {
 			continue;
