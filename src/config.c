@@ -17,6 +17,7 @@
 static int parse_header(config_t *config, const char *data);
 static int parse_sort_headers(config_t *config, const char *field);
 static int parse_formula(config_t *config, const char *src);
+static void raw_formula_free(void *v);
 static bool is_valid_header_name(config_t *config, const char *header);
 
 int
@@ -28,6 +29,8 @@ config_parse(const char *path, config_t *config)
 	int save_errno = 0;
 	char *sort_header = NULL;
 	char *data = NULL;
+	array_t raw_formulas;
+	bool raw_formulas_init = false;
 
 	if (path == NULL || config == NULL) {
 		save_errno = EINVAL;
@@ -37,6 +40,11 @@ config_parse(const char *path, config_t *config)
 	memset(config, 0, sizeof(*config));
 
 	if (array_init(&config->formulas, sizeof(array_t), array_destroy_void) == -1) {
+		save_errno = errno;
+		goto end;
+	}
+
+	if (array_init(&raw_formulas, sizeof(char*), raw_formula_free) == -1) {
 		save_errno = errno;
 		goto end;
 	}
@@ -123,12 +131,17 @@ config_parse(const char *path, config_t *config)
 		}
 		else if (COL_CMP("CSV_FORMULA", config_ptr, col_len)) {
 			config_ptr = line_sep + 1;
-			if (token_string_get(&config_ptr, &data) == -1 ||
-				 parse_formula(config, data) == -1) {
+			if (token_string_get(&config_ptr, &data) == -1) {
 				save_errno = errno;
-				fprintf(stderr, "Failed to parse CSV_FORMULA '%s'.\n", data);
+				fprintf(stderr, "Failed to parse CSV_FORMULA '%s'.\n", config_ptr);
 				goto end;
 			}
+
+			if (array_add(&raw_formulas, &data) == -1) {
+				save_errno = errno;
+				goto end;
+			}
+			data = NULL;
 		}
 		else if (COL_CMP("HEADERS", config_ptr, col_len)) {
 			config_ptr = line_sep + 1;
@@ -194,6 +207,16 @@ config_parse(const char *path, config_t *config)
 			save_errno = EINVAL;
 			goto end;
 		}
+
+		for (size_t i = 0; i < raw_formulas.len; ++i) {
+			char **str_p = ARRAY_GET(&raw_formulas, char*, i);
+			char *str = *str_p;
+			if (parse_formula(config, str) == -1) {
+				fprintf(stderr, "Failed to parse CSV_FORMULA '%s'.\n", str);
+				save_errno = EINVAL;
+				goto end;
+			}
+		}
 	}
 	else {
 		fprintf(stderr, "No HEADERS\n");
@@ -231,6 +254,11 @@ end:
 	if (sort_header != NULL) {
 		free(sort_header);
 		sort_header = NULL;
+	}
+
+	if (raw_formulas_init) {
+		array_destroy(&raw_formulas);
+		raw_formulas_init = true;
 	}
 
 	if (save_errno != 0) {
@@ -728,4 +756,15 @@ is_valid_header_name(config_t *config, const char *header)
 	}
 
 	return true;
+}
+
+static void
+raw_formula_free(void *p)
+{
+	char **str = (char**)p;
+	char *real_str = *str;
+
+	if (real_str != NULL) {
+		free(real_str);
+	}
 }
